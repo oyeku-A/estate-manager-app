@@ -22,7 +22,7 @@ A simple role-based estate management system built with Flask and Tailwind CSS.
 1. Clone the repository:
 ```bash
 git clone <repository-url>
-cd estate-manager
+cd estate-manager-app
 ```
 
 2. Create a virtual environment and activate it:
