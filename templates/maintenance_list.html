@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Maintenance Tasks{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Maintenance Tasks</h1>
+        <a href="{{ url_for('report_maintenance') }}"
+            class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+            Report New Issue
+        </a>
+    </div>
+
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="border-t border-gray-200">
+            {% if maintenance_tasks %}
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Issue</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Reporter</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Priority</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cost</th>
+                        {% if current_user.role in ['admin', 'agent'] %}
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for task in maintenance_tasks %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">{{ task.property.title }}</div>
+                            <div class="text-sm text-gray-500">{{ task.property.location }}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm text-gray-900">{{ task.title }}</div>
+                            <div class="text-sm text-gray-500">{{ task.description|truncate(100) }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm text-gray-500">{{ task.reporter.name }}</div>
+                            <div class="text-xs text-gray-400">{{ task.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                {% if task.priority == 'high' %}bg-red-100 text-red-800
+                                {% elif task.priority == 'medium' %}bg-yellow-100 text-yellow-800
+                                {% else %}bg-green-100 text-green-800{% endif %}">
+                                {{ task.priority|title }}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                {% if task.status == 'completed' %}bg-green-100 text-green-800
+                                {% elif task.status == 'in_progress' %}bg-blue-100 text-blue-800
+                                {% else %}bg-yellow-100 text-yellow-800{% endif %}">
+                                {{ task.status|replace('_', ' ')|title }}
+                            </span>
+                            {% if task.completed_at %}
+                            <div class="text-xs text-gray-400 mt-1">Completed: {{ task.completed_at.strftime('%Y-%m-%d %H:%M') }}</div>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            ₦{{ "%.2f"|format(task.estimated_cost or 0) }}
+                        </td>
+                        {% if current_user.role in ['admin', 'agent'] and task.status != 'completed' %}
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <form action="{{ url_for('update_maintenance', task_id=task.id) }}" method="POST" class="inline">
+                                <select name="status" class="mr-2 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    <option value="pending" {% if task.status == 'pending' %}selected{% endif %}>Pending</option>
+                                    <option value="in_progress" {% if task.status == 'in_progress' %}selected{% endif %}>In Progress</option>
+                                    <option value="completed" {% if task.status == 'completed' %}selected{% endif %}>Completed</option>
+                                </select>
+                                <button type="submit" class="text-blue-600 hover:text-blue-900">Update</button>
+                            </form>
+                        </td>
+                        {% elif current_user.role in ['admin', 'agent'] %}
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            Task completed
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <div class="text-center py-8">
+                <p class="text-gray-500">No maintenance tasks found.</p>
+                {% if properties %}
+                <a href="{{ url_for('report_maintenance') }}" class="text-blue-600 hover:text-blue-900 mt-2 inline-block">
+                    Report a new maintenance issue
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

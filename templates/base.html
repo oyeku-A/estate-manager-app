@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %} - Estate Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            min-width: 160px;
+            z-index: 50;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            border-radius: 0.375rem;
+        }
+        
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .flash-message {
+            animation: fadeOut 0.5s ease-in forwards;
+            animation-delay: 3s;
+        }
+
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-100%);
+                display: none;
+            }
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: white;
+            background-color: #EF4444;
+            min-width: 1.5rem;
+            min-height: 1.5rem;
+        }
+
+        .nav-item {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <nav class="bg-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <!-- Logo -->
+                <div class="flex-shrink-0">
+                    <a href="{{ url_for('index') }}" class="text-white font-bold text-xl">Estate Manager</a>
+                </div>
+
+                <!-- Navigation Links -->
+                <div class="flex items-center space-x-4">
+                    {% if current_user.is_authenticated %}
+                        <div class="nav-item">
+                            <a href="{{ url_for('dashboard') }}" 
+                                class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                                Dashboard
+                            </a>
+                            {% set pending_count = get_pending_actions_count() %}
+                            {% if pending_count > 0 %}
+                            <span class="notification-badge">{{ pending_count }}</span>
+                            {% endif %}
+                        </div>
+                        {% if current_user.role in ['admin', 'agent'] %}
+                            {% if current_user.role == 'agent' %}
+                            <a href="{{ url_for('property_create') }}" 
+                                class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                                Add Property
+                            </a>
+                            {% endif %}
+                        {% endif %}
+                        <div class="nav-item">
+                            <a href="{{ url_for('message_list') }}" 
+                                class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                                Messages
+                            </a>
+                            {% set unread_count = get_unread_messages_count() %}
+                            {% if unread_count > 0 %}
+                            <span class="notification-badge">{{ unread_count }}</span>
+                            {% endif %}
+                        </div>
+                        <a href="{{ url_for('maintenance_list') }}" 
+                            class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                            Maintenance
+                        </a>
+                        <a href="{{ url_for('logout') }}" 
+                            class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                            Logout
+                        </a>
+                    {% else %}
+                        <a href="{{ url_for('login') }}" 
+                            class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                            Login
+                        </a>
+                        <a href="{{ url_for('register') }}" 
+                            class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
+                            Register
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="fixed top-4 right-4 z-50 space-y-2">
+                {% for category, message in messages %}
+                    <div class="flash-message bg-{{ 'green' if category == 'success' else 'yellow' }}-100 border border-{{ 'green' if category == 'success' else 'yellow' }}-400 text-{{ 'green' if category == 'success' else 'yellow' }}-700 px-4 py-3 rounded relative" role="alert">
+                        <span class="block sm:inline">{{ message }}</span>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <script>
+        // Remove flash messages after animation
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashMessages = document.querySelectorAll('.flash-message');
+            flashMessages.forEach(function(message) {
+                setTimeout(function() {
+                    message.remove();
+                }, 3500);
+            });
+        });
+    </script>
+</body>
+</html> 

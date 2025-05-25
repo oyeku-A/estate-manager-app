@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Process Payment{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-8">
+    <div class="bg-white shadow rounded-lg p-6">
+        <h2 class="text-2xl font-bold mb-6">Payment Details</h2>
+        
+        <!-- Property Information -->
+        <div class="mb-6">
+            <h3 class="text-lg font-semibold mb-4">Property Details</h3>
+            <div class="bg-gray-50 rounded-lg p-4">
+                <p class="mb-2"><strong>Property:</strong> {{ property.title }}</p>
+                <p class="mb-2"><strong>Location:</strong> {{ property.location }}</p>
+                <p class="mb-2"><strong>Type:</strong> {{ property.property_type|title }}</p>
+                {% if property.property_type == 'rent' %}
+                    <p class="mb-2"><strong>Duration:</strong> {{ booking.duration_months }} months</p>
+                    <p class="mb-2"><strong>Monthly Rent:</strong> ₦{{ "%.2f"|format(property.price) }}</p>
+                    <p class="text-lg font-semibold text-blue-600">
+                        <strong>Total Amount:</strong> ₦{{ "%.2f"|format(property.price * booking.duration_months) }}
+                    </p>
+                {% else %}
+                    <p class="text-lg font-semibold text-blue-600">
+                        <strong>Purchase Price:</strong> ₦{{ "%.2f"|format(property.price) }}
+                    </p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Payment Form -->
+        <form action="{{ url_for('process_payment', booking_id=booking.id) }}" method="post" class="space-y-6">
+            <div>
+                <label for="payment_method" class="block text-sm font-medium text-gray-700">Payment Method</label>
+                <select id="payment_method" name="payment_method" required
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                    <option value="">Select a payment method</option>
+                    <option value="bank_transfer">Bank Transfer</option>
+                    <option value="card">Credit/Debit Card</option>
+                    <option value="cash">Cash Payment</option>
+                </select>
+            </div>
+
+            <!-- Bank Transfer Details (shown when bank transfer is selected) -->
+            <div id="bank_details" class="hidden bg-gray-50 rounded-lg p-4 space-y-2">
+                <h4 class="font-semibold text-gray-900">Bank Transfer Details</h4>
+                <p><strong>Bank Name:</strong> First Bank</p>
+                <p><strong>Account Name:</strong> Estate Manager Ltd</p>
+                <p><strong>Account Number:</strong> 1234567890</p>
+                <p class="text-sm text-gray-600 mt-2">
+                    Please use your booking reference ({{ booking.id }}) as payment reference
+                </p>
+            </div>
+
+            <div class="flex items-center justify-between pt-4">
+                <a href="{{ url_for('user_dashboard') }}"
+                    class="text-gray-600 hover:text-gray-800">Cancel</a>
+                <button type="submit"
+                    class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    Confirm Payment
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.getElementById('payment_method').addEventListener('change', function() {
+    const bankDetails = document.getElementById('bank_details');
+    if (this.value === 'bank_transfer') {
+        bankDetails.classList.remove('hidden');
+    } else {
+        bankDetails.classList.add('hidden');
+    }
+});
+</script>
+{% endblock %} 

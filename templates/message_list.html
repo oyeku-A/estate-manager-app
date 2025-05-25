@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Messages{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Messages</h1>
+        <a href="{{ url_for('send_message') }}"
+            class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+            New Message
+        </a>
+    </div>
+
+    <!-- Inbox -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg mb-8">
+        <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900">Inbox</h2>
+        </div>
+        <div class="divide-y divide-gray-200">
+            {% if received_messages %}
+                {% for message in received_messages %}
+                <div class="p-4 hover:bg-gray-50 {% if not message.read_at %}bg-blue-50{% endif %}">
+                    <a href="{{ url_for('view_message', message_id=message.id) }}" class="block">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2">
+                                    <span class="font-medium text-gray-900">{{ message.sender.name }}</span>
+                                    <span class="text-sm text-gray-500">({{ message.sender.role }})</span>
+                                    {% if not message.read_at %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                        New
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <p class="mt-1 text-sm font-medium text-gray-900">{{ message.subject }}</p>
+                                <p class="mt-1 text-sm text-gray-600">{{ message.content|truncate(100) }}</p>
+                                {% if message.related_property_id %}
+                                <p class="mt-1 text-xs text-gray-500">
+                                    Related to property: {{ message.property.title }}
+                                </p>
+                                {% endif %}
+                            </div>
+                            <div class="ml-4 flex-shrink-0">
+                                <span class="text-sm text-gray-500">
+                                    {{ message.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="p-4 text-center text-gray-500">
+                    No messages in your inbox.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Sent Messages -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6 border-b border-gray-200">
+            <h2 class="text-xl font-semibold text-gray-900">Sent Messages</h2>
+        </div>
+        <div class="divide-y divide-gray-200">
+            {% if sent_messages %}
+                {% for message in sent_messages %}
+                <div class="p-4 hover:bg-gray-50">
+                    <a href="{{ url_for('view_message', message_id=message.id) }}" class="block">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-sm text-gray-500">To:</span>
+                                    <span class="font-medium text-gray-900">{{ message.receiver.name }}</span>
+                                    <span class="text-sm text-gray-500">({{ message.receiver.role }})</span>
+                                    {% if message.read_at %}
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        Read
+                                    </span>
+                                    {% endif %}
+                                </div>
+                                <p class="mt-1 text-sm font-medium text-gray-900">{{ message.subject }}</p>
+                                <p class="mt-1 text-sm text-gray-600">{{ message.content|truncate(100) }}</p>
+                                {% if message.related_property_id %}
+                                <p class="mt-1 text-xs text-gray-500">
+                                    Related to property: {{ message.property.title }}
+                                </p>
+                                {% endif %}
+                            </div>
+                            <div class="ml-4 flex-shrink-0">
+                                <span class="text-sm text-gray-500">
+                                    {{ message.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="p-4 text-center text-gray-500">
+                    No sent messages.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

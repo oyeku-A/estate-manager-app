@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}User Dashboard{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">My Dashboard</h1>
+    </div>
+
+    <!-- Bookings Section -->
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
+            <h2 class="text-xl font-semibold text-gray-900">My Bookings</h2>
+        </div>
+        <div class="border-t border-gray-200">
+            {% if bookings %}
+            <div class="grid grid-cols-1 gap-6 p-6">
+                {% for booking in bookings %}
+                <div class="bg-white shadow rounded-lg p-6">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-900">{{ booking.property.title }}</h3>
+                            <p class="text-gray-600">{{ booking.property.location }}</p>
+                            <p class="text-gray-600">Booking Date: {{ booking.booking_date.strftime('%Y-%m-%d') }}</p>
+                            <p class="text-gray-600">Duration: {{ booking.duration_months }} months</p>
+                            <p class="text-gray-600">Move In: {{ booking.move_in_date.strftime('%Y-%m-%d') if booking.move_in_date else 'Not set' }}</p>
+                            <p class="text-gray-600">Move Out: {{ booking.move_out_date.strftime('%Y-%m-%d') if booking.move_out_date else 'Not set' }}</p>
+                            
+                            <!-- Payment Information -->
+                            {% if booking.property.property_type == 'rent' %}
+                            <p class="mt-4 text-lg font-semibold text-gray-900">
+                                Monthly Rent: ₦{{ "%.2f"|format(booking.property.price) }}
+                            </p>
+                            <p class="text-gray-600">
+                                Total Amount: ₦{{ "%.2f"|format(booking.property.price * booking.duration_months) }}
+                            </p>
+                            {% else %}
+                            <p class="mt-4 text-lg font-semibold text-gray-900">
+                                Purchase Price: ₦{{ "%.2f"|format(booking.property.price) }}
+                            </p>
+                            {% endif %}
+                        </div>
+                        <div class="text-right">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium
+                                {% if booking.status == 'pending' %}
+                                    bg-yellow-100 text-yellow-800
+                                {% elif booking.status == 'approved' or booking.status == 'pending_payment' %}
+                                    bg-green-100 text-green-800
+                                {% elif booking.status == 'rejected' %}
+                                    bg-red-100 text-red-800
+                                {% elif booking.status == 'paid' %}
+                                    bg-blue-100 text-blue-800
+                                {% endif %}">
+                                {{ booking.status|replace('_', ' ')|title }}
+                            </span>
+                            
+                            {% if booking.status in ['approved', 'pending_payment'] %}
+                            <div class="mt-4">
+                                <a href="{{ url_for('payment_status', booking_id=booking.id) }}"
+                                    class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    Make Payment
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if booking.special_requests %}
+                    <div class="mt-4">
+                        <h4 class="text-lg font-medium text-gray-900">Special Requests</h4>
+                        <p class="text-gray-600 mt-1">{{ booking.special_requests|nl2br }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-8">
+                <p class="text-gray-500 mb-4">You haven't made any bookings yet.</p>
+                <a href="{{ url_for('index') }}"
+                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                    Browse Properties
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

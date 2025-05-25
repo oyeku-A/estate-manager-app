@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}{{ property.title }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div class="px-4 py-5 sm:px-6 flex justify-between items-start">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900">{{ property.title }}</h1>
+                <p class="mt-1 text-sm text-gray-500">Listed by {{ agent.name }} ({{ agent.role }})</p>
+            </div>
+            <div class="flex space-x-4">
+                {% if current_user.is_authenticated and (current_user.role in ['admin', 'agent'] and (current_user.id == property.agent_id or current_user.role == 'admin')) %}
+                <a href="{{ url_for('property_edit', property_id=property.id) }}"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                    Edit Property
+                </a>
+                {% endif %}
+                {% if current_user.is_authenticated and current_user.role == 'user' %}
+                <a href="#booking-form"
+                    class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+                    Book Property
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="border-t border-gray-200">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-6">
+                <!-- Property Image -->
+                <div class="relative h-96 rounded-lg overflow-hidden shadow-md">
+                    {% if property.image_url %}
+                    <img src="{{ property.image_url }}" 
+                         alt="{{ property.title }}"
+                         class="w-full h-full object-cover"
+                         onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/placeholder.jpg') }}'">
+                    {% else %}
+                    <img src="{{ url_for('static', filename='images/placeholder.jpg') }}"
+                         alt="No image available"
+                         class="w-full h-full object-cover">
+                    {% endif %}
+                </div>
+
+                <!-- Property Details -->
+                <div class="space-y-6">
+                    <div>
+                        <h2 class="text-xl font-semibold text-gray-900">Property Details</h2>
+                        <div class="mt-4 space-y-4">
+                            <p class="text-3xl font-bold text-gray-900">₦{{ "%.2f"|format(property.price) }}</p>
+                            <p class="text-lg text-gray-700">
+                                <span class="font-medium">Type:</span> 
+                                {{ "For Sale" if property.property_type == 'sale' else "For Rent" }}
+                            </p>
+                            <p class="text-lg text-gray-700">
+                                <span class="font-medium">Location:</span> 
+                                {{ property.location }}
+                            </p>
+                            <p class="text-lg text-gray-700">
+                                <span class="font-medium">Status:</span>
+                                <span class="px-2 py-1 text-sm font-semibold rounded-full 
+                                    {% if property.status == 'available' %}bg-green-100 text-green-800
+                                    {% else %}bg-red-100 text-red-800{% endif %}">
+                                    {{ property.status|title }}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Description</h3>
+                        <p class="mt-2 text-gray-600 whitespace-pre-line">{{ property.description }}</p>
+                    </div>
+
+                    {% if current_user.is_authenticated and current_user.role == 'user' and property.status == 'available' %}
+                    <div id="booking-form" class="mt-8 p-6 bg-gray-50 rounded-lg">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">Book This Property</h3>
+                        <form method="POST" action="{{ url_for('book_property', property_id=property.id) }}" class="space-y-4">
+                            <div>
+                                <label for="booking_date" class="block text-sm font-medium text-gray-700">Booking Date</label>
+                                <input type="date" id="booking_date" name="booking_date" required
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+
+                            {% if property.property_type == 'rent' %}
+                            <div>
+                                <label for="duration_months" class="block text-sm font-medium text-gray-700">Duration (months)</label>
+                                <input type="number" id="duration_months" name="duration_months" min="1" max="60" required
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            {% endif %}
+
+                            <div>
+                                <label for="special_requests" class="block text-sm font-medium text-gray-700">Special Requests</label>
+                                <textarea id="special_requests" name="special_requests" rows="3"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+                            </div>
+
+                            <button type="submit"
+                                class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                Submit Booking Request
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if current_user.role == 'admin' %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const agentSelect = document.getElementById('assigned_agent_id');
+    if (agentSelect) {
+        fetch('/agents/available?property_type={{ property.property_type }}')
+            .then(response => response.json())
+            .then(agents => {
+                agents.forEach(agent => {
+                    if (agent.id != {{ property.agent_id }}) {
+                        const option = document.createElement('option');
+                        option.value = agent.id;
+                        option.textContent = agent.name;
+                        agentSelect.appendChild(option);
+                    }
+                });
+            });
+    }
+});
+</script>
+{% endif %}
+{% endblock %} 

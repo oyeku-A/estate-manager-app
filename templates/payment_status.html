@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Payment Status{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-8">
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <h1 class="text-2xl font-bold text-gray-900 mb-6">Payment Status</h1>
+
+        <div class="space-y-6">
+            <div class="bg-gray-50 p-4 rounded-md">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500">Payment Status</p>
+                        <p class="mt-1 text-lg font-semibold 
+                            {% if payment.status == 'completed' %}text-green-600
+                            {% elif payment.status == 'failed' %}text-red-600
+                            {% else %}text-yellow-600{% endif %}">
+                            {{ payment.status|title }}
+                        </p>
+                    </div>
+                    {% if payment.status == 'completed' %}
+                    <div class="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
+                        <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="border-t border-gray-200 pt-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Payment Details</h2>
+                <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Transaction ID</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ payment.transaction_id }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Amount</dt>
+                        <dd class="mt-1 text-sm text-gray-900">₦{{ "%.2f"|format(payment.amount) }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Payment Method</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ payment.payment_method|title }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Payment Date</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ payment.created_at.strftime('%Y-%m-%d %H:%M') }}</dd>
+                    </div>
+                </dl>
+            </div>
+
+            <div class="border-t border-gray-200 pt-6">
+                <h2 class="text-lg font-semibold text-gray-900 mb-4">Booking Information</h2>
+                <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Property</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ booking.property.title }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Location</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ booking.property.location }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Booking Date</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ booking.booking_date.strftime('%Y-%m-%d') }}</dd>
+                    </div>
+                    {% if booking.duration_months %}
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Duration</dt>
+                        <dd class="mt-1 text-sm text-gray-900">{{ booking.duration_months }} months</dd>
+                    </div>
+                    {% endif %}
+                </dl>
+            </div>
+
+            <div class="flex justify-end space-x-4">
+                <a href="{{ url_for('user_dashboard') }}"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">
+                    Return to Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
