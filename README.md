@@ -7,7 +7,7 @@ A simple role-based estate management system built with Flask and Tailwind CSS.
 - Role-based access control (Admin, Agent, User)
 - Property management (CRUD operations)
 - Booking system with approval workflow
-- Responsive design using Tailwind CSS
+- Desktop Focused Design using Tailwind CSS
 - User authentication and authorization
 - Supabase PostgreSQL integration
 
@@ -16,6 +16,7 @@ A simple role-based estate management system built with Flask and Tailwind CSS.
 - Python 3.8 or higher
 - pip (Python package manager)
 - Supabase account and project
+- Supabase storage bucket named "property-images"
 
 ## Setup
 
@@ -49,11 +50,13 @@ FLASK_APP=app
 FLASK_ENV=development
 SECRET_KEY=your-secret-key-here
 DATABASE_URL=your-supabase-connection-string
+SUPABASE_URL=your-supabase-url
+SUPABASE_ANON_KEY=your-supabase-anon-key
 ```
 
 6. Run the application:
 ```bash
-python run.py
+python app.py
 ```
 
 The script will:
@@ -74,20 +77,28 @@ The application will be available at `http://localhost:5000`
 ```
 estate-manager/
 ├── app.py              # Main application file
-├── run.py             # Database initialization and runner
 ├── requirements.txt    # Python dependencies
 ├── templates/         # HTML templates
+│   ├── admin_dashboard.html
+│   ├── agent_dashboard.html
 │   ├── base.html
 │   ├── index.html
 │   ├── login.html
-│   ├── register.html
+│   ├── maintenance_form.html
+│   ├── maintenance_list.html
+│   ├── message_detail.html
+│   ├── message_form.html
+│   ├── message_list.html
+│   ├── payment_form.html
+│   ├── payment_status.html
 │   ├── property_detail.html
 │   ├── property_form.html
-│   ├── admin_dashboard.html
-│   ├── agent_dashboard.html
-│   └── user_dashboard.html
+│   ├── property_list.html
+│   ├── register.html
+│   ├── user_dashboard.html
 └── .env               # Environment variables (create this file)
 ```
+
 
 ## Usage
 
