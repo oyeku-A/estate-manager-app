@@ -80,3 +80,4 @@ Werkzeug==2.3.7
 wheel==0.45.1
 WTForms==3.2.1
 zipp==3.21.0
+gunicorn
